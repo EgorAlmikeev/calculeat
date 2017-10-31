@@ -55,8 +55,6 @@ public slots:
     void slotEqualButtonPressed();
     void slotDotButtonPressed();
     void LCDError();
-
-    void addPictures();
 };
 
 #endif // MAINWINDOW_H

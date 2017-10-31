@@ -132,7 +132,7 @@ void MainWindow::slotClearButtonPressed()
 
 void MainWindow::slotDigitButtonPressed(int digit)
 {
-    addPictures();
+    //при нажатии на кнопку цифры после выполнения операций введенная цифра добавляется ко второму операнду
 
     if(digit == 0 && p_screen->text().isEmpty())
         return;
@@ -206,17 +206,4 @@ void MainWindow::slotDotButtonPressed()
 void MainWindow::LCDError()
 {
     p_screen->setText("Error");
-}
-
-void MainWindow::addPictures()
-{
-    QLabel *p_pic_label_1 = new QLabel(p_central_widget);
-
-    QPalette pal1;
-    pal1.setBrush(p_pic_label_1->backgroundRole(), QBrush(QPixmap(":/green button.png")));
-
-    p_pic_label_1->setPalette(pal1);
-    p_pic_label_1->setAutoFillBackground(true);
-
-    p_pic_label_1->setGeometry(100, 100, 100, 100);
 }
