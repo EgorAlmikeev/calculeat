@@ -3,16 +3,26 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    next_number = 0;
+    result = 0;
+    first = 0;
+    second = 0;
+    operation = none;
+
     p_central_widget = new QWidget;
     p_central_layout = new QGridLayout;
     p_central_widget->setLayout(p_central_layout);
     setCentralWidget(p_central_widget);
+
+//    p_central_layout->setMargin(0);
+    p_central_layout->setSpacing(20);
 
     buttons_font.setFamily("Arial");
     buttons_font.setWeight(15);
     buttons_font.setPixelSize(15);
 
     p_screen = new QLineEdit;
+    p_screen->setReadOnly(true);
 
     digit_buttons_mapper = new QSignalMapper;
     operation_buttons_mapper = new QSignalMapper;
@@ -117,10 +127,13 @@ void MainWindow::slotClearButtonPressed()
     result = 0;
     first = 0;
     second = 0;
+    operation = none;
 }
 
 void MainWindow::slotDigitButtonPressed(int digit)
 {
+    addPictures();
+
     if(digit == 0 && p_screen->text().isEmpty())
         return;
 
@@ -141,6 +154,15 @@ void MainWindow::slotDigitButtonPressed(int digit)
 
 void MainWindow::slotOperationButtonPressed(int operation_id)
 {
+    if(equal_clicked)
+    {
+        equal_clicked = false;
+        operation = none;
+    }
+
+    if(operation != none)
+        slotEqualButtonPressed();
+
     if(!first)
         first = next_number;
     next_number = 0;
@@ -156,6 +178,8 @@ void MainWindow::slotOperationButtonPressed(int operation_id)
 
 void MainWindow::slotEqualButtonPressed()
 {
+    equal_clicked = true;
+
     second = next_number;
 
     switch(operation)
@@ -182,4 +206,17 @@ void MainWindow::slotDotButtonPressed()
 void MainWindow::LCDError()
 {
     p_screen->setText("Error");
+}
+
+void MainWindow::addPictures()
+{
+    QLabel *p_pic_label_1 = new QLabel(p_central_widget);
+
+    QPalette pal1;
+    pal1.setBrush(p_pic_label_1->backgroundRole(), QBrush(QPixmap(":/green button.png")));
+
+    p_pic_label_1->setPalette(pal1);
+    p_pic_label_1->setAutoFillBackground(true);
+
+    p_pic_label_1->setGeometry(100, 100, 100, 100);
 }

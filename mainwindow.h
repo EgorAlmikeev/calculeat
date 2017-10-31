@@ -7,6 +7,7 @@
 #include <QSignalMapper>
 #include <QLineEdit>
 #include <QFont>
+#include <QLabel>
 
 class MainWindow : public QMainWindow
 {
@@ -36,6 +37,7 @@ public:
     enum operations {plus, minus, multiplication, division, none};
 
     operations operation;
+    bool equal_clicked;
 
     QSignalMapper *digit_buttons_mapper;
     QSignalMapper *operation_buttons_mapper;
@@ -53,6 +55,8 @@ public slots:
     void slotEqualButtonPressed();
     void slotDotButtonPressed();
     void LCDError();
+
+    void addPictures();
 };
 
 #endif // MAINWINDOW_H

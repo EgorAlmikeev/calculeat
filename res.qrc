@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>green button.png</file>
+    </qresource>
+</RCC>
