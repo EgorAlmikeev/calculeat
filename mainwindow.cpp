@@ -3,49 +3,111 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    next_number = 0;
-    result = 0;
-    first = 0;
-    second = 0;
+    createElements();
+    createConnections();
+    createDesign();
+    emit clearButtonPressed();
+}
+
+MainWindow::~MainWindow()
+{}
+
+void MainWindow::clearButtonPressed()
+{
+    displayable_value = "0.0";
+    first_argument = "NULL";
+    second_argument = "NULL";
     operation = none;
+    p_screen->setText(displayable_value);
+}
 
-    p_central_widget = new QWidget;
-    p_central_layout = new QGridLayout;
-    p_central_widget->setLayout(p_central_layout);
-    setCentralWidget(p_central_widget);
+void MainWindow::digitButtonPressed(QString digit)
+{
+    if(displayable_value == "0.0")
+        displayable_value = digit;
+    else
+        displayable_value += digit;
+    p_screen->setText(displayable_value);
+}
 
-//    p_central_layout->setMargin(0);
-    p_central_layout->setSpacing(20);
+void MainWindow::operationButtonPressed(int operation_id)
+{
+    if(first_argument == "NULL" && second_argument == "NULL" && displayable_value == "0.0")
+        return;
+
+    if(operation == none)
+    {
+        first_argument = displayable_value;
+        operation = operation_id;
+    }
+    else if(second_argument == "NULL")
+        operation = operation_id;
+    else
+    {
+        second_argument = displayable_value;
+        calculate();
+        operation = operation_id;
+        first_argument = displayable_value;
+    }
+
+    if(first_argument != "NULL")
+    {
+        displayable_value = "0.0";
+        p_screen->setText(displayable_value);
+    }
+}
+
+void MainWindow::dotButtonPressed()
+{
+    if(!displayable_value.contains("."))
+        displayable_value.append(".");
+    p_screen->setText(displayable_value);
+}
+
+void MainWindow::lcdError()
+{
+    p_screen->setText("Error");
+}
+
+void MainWindow::calculate()
+{
+    static double local_first_argument = 0.0;
+    static double local_second_argument = 0.0;
+
+    if(operation == none)
+        return;
+
+    local_first_argument = first_argument.toDouble();
+
+    if(second_argument == "NULL")
+    {
+        local_second_argument = displayable_value.toDouble();
+        second_argument = displayable_value;
+    }
+
+    switch(operation)
+    {
+    case plus : local_first_argument += local_second_argument; break;
+    case minus : local_first_argument -= local_second_argument; break;
+    case division : local_first_argument /= local_second_argument; break;
+    case multiplication : local_first_argument *= local_second_argument; break;
+    }
+
+    first_argument = QString::number(local_first_argument);
+    second_argument = QString::number(local_second_argument);
+
+    displayable_value = first_argument;
+    p_screen->setText(displayable_value);
+}
+
+void MainWindow::createDesign()
+{
+    p_central_layout->setMargin(5);
+    p_central_layout->setSpacing(5);
 
     buttons_font.setFamily("Arial");
     buttons_font.setWeight(15);
     buttons_font.setPixelSize(15);
-
-    p_screen = new QLineEdit;
-    p_screen->setReadOnly(true);
-
-    digit_buttons_mapper = new QSignalMapper;
-    operation_buttons_mapper = new QSignalMapper;
-
-    for(int i = 0; i < 10; ++i)
-    {
-        digits_buttons[i] = new QPushButton(QString::number(i));
-        digits_buttons[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        digits_buttons[i]->setFont(buttons_font);
-
-        digit_buttons_mapper->setMapping(digits_buttons[i], i);
-        connect(digits_buttons[i], SIGNAL(clicked()), digit_buttons_mapper, SLOT(map()), Qt::UniqueConnection);
-    }
-
-    connect(digit_buttons_mapper, SIGNAL(mapped(int)), this, SLOT(slotDigitButtonPressed(int)), Qt::UniqueConnection);
-
-    p_button_plus = new QPushButton("+");
-    p_button_minus = new QPushButton("-");
-    p_button_multiplication = new QPushButton("x");
-    p_button_division = new QPushButton("÷");
-    p_button_equalse = new QPushButton("=");
-    p_button_clear = new QPushButton("Clear");
-    p_button_dot = new QPushButton(".");
 
     p_button_plus->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     p_button_minus->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -99,111 +161,59 @@ MainWindow::MainWindow(QWidget *parent)
     p_central_layout->setColumnStretch(1, 1);
     p_central_layout->setColumnStretch(2, 1);
     p_central_layout->setColumnStretch(3, 1);
+}
+
+void MainWindow::createElements()
+{
+    p_central_widget = new QWidget;
+    p_central_layout = new QGridLayout;
+    p_central_widget->setLayout(p_central_layout);
+    setCentralWidget(p_central_widget);
+
+    p_screen = new QLineEdit;
+    p_screen->setReadOnly(true);
+//    p_screen->setPlaceholderText("sample text");
+
+    p_button_plus = new QPushButton("+");
+    p_button_minus = new QPushButton("-");
+    p_button_multiplication = new QPushButton("x");
+    p_button_division = new QPushButton("÷");
+    p_button_equalse = new QPushButton("=");
+    p_button_clear = new QPushButton("Clear");
+    p_button_dot = new QPushButton(".");
+}
+
+void MainWindow::createConnections()
+{
+    digit_buttons_mapper = new QSignalMapper;
+    operation_buttons_mapper = new QSignalMapper;
+
+    for(int i = 0; i < 10; ++i)
+    {
+        digits_buttons[i] = new QPushButton(QString::number(i));
+        digits_buttons[i]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        digits_buttons[i]->setFont(buttons_font);
+
+        digit_buttons_mapper->setMapping(digits_buttons[i], QString::number(i));
+        connect(digits_buttons[i], SIGNAL(clicked()), digit_buttons_mapper, SLOT(map()), Qt::UniqueConnection);
+    }
+
+    connect(digit_buttons_mapper, SIGNAL(mapped(QString)), this, SLOT(digitButtonPressed(QString)), Qt::UniqueConnection);
 
 
-    connect(p_button_clear, SIGNAL(clicked()), this, SLOT(slotClearButtonPressed()), Qt::UniqueConnection);
-    connect(p_button_equalse, SIGNAL(clicked()), this, SLOT(slotEqualButtonPressed()), Qt::UniqueConnection);
+    connect(p_button_clear, SIGNAL(clicked()), this, SLOT(clearButtonPressed()), Qt::UniqueConnection);
+    connect(p_button_equalse, SIGNAL(clicked()), this, SLOT(calculate()), Qt::UniqueConnection);
+    connect(p_button_dot, SIGNAL(clicked()), this, SLOT(dotButtonPressed()), Qt::UniqueConnection);
 
     connect(p_button_plus, SIGNAL(clicked()), operation_buttons_mapper, SLOT(map()), Qt::UniqueConnection);
     connect(p_button_minus, SIGNAL(clicked()), operation_buttons_mapper, SLOT(map()), Qt::UniqueConnection);
     connect(p_button_multiplication, SIGNAL(clicked()), operation_buttons_mapper, SLOT(map()), Qt::UniqueConnection);
     connect(p_button_division, SIGNAL(clicked()), operation_buttons_mapper, SLOT(map()), Qt::UniqueConnection);
 
-    operation_buttons_mapper->setMapping(p_button_plus, 1);
-    operation_buttons_mapper->setMapping(p_button_minus, 2);
-    operation_buttons_mapper->setMapping(p_button_multiplication, 3);
-    operation_buttons_mapper->setMapping(p_button_division, 4);
+    operation_buttons_mapper->setMapping(p_button_plus, operations::plus);
+    operation_buttons_mapper->setMapping(p_button_minus, operations::minus);
+    operation_buttons_mapper->setMapping(p_button_multiplication, operations::multiplication);
+    operation_buttons_mapper->setMapping(p_button_division, operations::division);
 
-    connect(operation_buttons_mapper, SIGNAL(mapped(int)), this, SLOT(slotOperationButtonPressed(int)), Qt::UniqueConnection);
-}
-
-MainWindow::~MainWindow()
-{}
-
-void MainWindow::slotClearButtonPressed()
-{
-    p_screen->setText(QString::number(0));
-    next_number = 0;
-    result = 0;
-    first = 0;
-    second = 0;
-    operation = none;
-}
-
-void MainWindow::slotDigitButtonPressed(int digit)
-{
-    //при нажатии на кнопку цифры после выполнения операций введенная цифра добавляется ко второму операнду
-
-    if(digit == 0 && p_screen->text().isEmpty())
-        return;
-
-    if(p_screen->text().contains(p_button_dot->text()))
-    {
-        for(int i = p_screen->text().indexOf(p_button_dot->text()); i < p_screen->text().length(); ++i)
-            digit /= 10;
-        next_number += digit;
-    }
-    else
-    {
-        next_number *= 10.0;
-        next_number += digit;
-    }
-
-    p_screen->setText(QString::number(next_number));
-}
-
-void MainWindow::slotOperationButtonPressed(int operation_id)
-{
-    if(equal_clicked)
-    {
-        equal_clicked = false;
-        operation = none;
-    }
-
-    if(operation != none)
-        slotEqualButtonPressed();
-
-    if(!first)
-        first = next_number;
-    next_number = 0;
-
-    switch(operation_id)
-    {
-    case 1 : operation = plus; break;
-    case 2 : operation = minus; break;
-    case 3 : operation = multiplication; break;
-    case 4 : operation = division; break;
-    }
-}
-
-void MainWindow::slotEqualButtonPressed()
-{
-    equal_clicked = true;
-
-    second = next_number;
-
-    switch(operation)
-    {
-    case plus : result = first + second; break;
-    case minus : result = first - second; break;
-    case multiplication : result = first * second; break;
-    case division : if(second == 0) { LCDError(); break; } result = first / second; break;
-    case none : break;
-    }
-
-    p_screen->setText(QString::number(result));
-    first = result;
-
-    if(result == 0)
-        emit slotClearButtonPressed();
-    if(result > 99999)
-        LCDError();
-}
-
-void MainWindow::slotDotButtonPressed()
-{}
-
-void MainWindow::LCDError()
-{
-    p_screen->setText("Error");
+    connect(operation_buttons_mapper, SIGNAL(mapped(int)), this, SLOT(operationButtonPressed(int)), Qt::UniqueConnection);
 }

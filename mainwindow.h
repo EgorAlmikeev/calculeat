@@ -19,7 +19,6 @@ public:
 
     QWidget *p_central_widget;
     QGridLayout *p_central_layout;
-
     QLineEdit *p_screen;
 
     QFont buttons_font;
@@ -36,25 +35,26 @@ public:
 
     enum operations {plus, minus, multiplication, division, none};
 
-    operations operation;
-    bool equal_clicked;
-
     QSignalMapper *digit_buttons_mapper;
     QSignalMapper *operation_buttons_mapper;
 
-    double next_number;
-    double result;
-    double first;
-    double second;
+    QString displayable_value = "NULL";
+    QString first_argument = "NULL";
+    QString second_argument = "NULL";
+    int operation = none;
 
-public slots:
+    void createElements();
+    void createDesign();
+    void createConnections();
 
-    void slotClearButtonPressed();
-    void slotDigitButtonPressed(int digit);
-    void slotOperationButtonPressed(int operation_id);
-    void slotEqualButtonPressed();
-    void slotDotButtonPressed();
-    void LCDError();
+private slots:
+
+    void clearButtonPressed();
+    void digitButtonPressed(QString digit);
+    void operationButtonPressed(int operation_id);
+    void dotButtonPressed();
+    void lcdError();
+    void calculate();
 };
 
 #endif // MAINWINDOW_H
