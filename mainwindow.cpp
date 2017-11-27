@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include "QDebug"
+#include "QThread"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,86 +20,96 @@ void MainWindow::clearButtonPressed()
     first_argument = "NULL";
     second_argument = "NULL";
     operation = none;
+    flag = false;
     p_screen->setText(displayable_value);
+
+    printDebugInfo();
 }
 
 void MainWindow::digitButtonPressed(QString digit)
 {
-    if(displayable_value == "0.0")
+    if(displayable_value == "Overflow" || displayable_value == "Error")
+        return;
+
+    if(flag)
+    {
+        flag = false;
         displayable_value = digit;
+        second_argument = displayable_value;
+    }
+    else if(displayable_value == "0.0")
+        second_argument = displayable_value = digit;
     else
+    {
         displayable_value += digit;
+        second_argument = displayable_value;
+    }
     p_screen->setText(displayable_value);
+
+    printDebugInfo();
 }
 
 void MainWindow::operationButtonPressed(int operation_id)
 {
-    if(first_argument == "NULL" && second_argument == "NULL" && displayable_value == "0.0")
-        return;
+    flag = true;
+    first_argument = displayable_value;
+    operation = operation_id;
 
-    if(operation == none)
-    {
-        first_argument = displayable_value;
-        operation = operation_id;
-    }
-    else if(second_argument == "NULL")
-        operation = operation_id;
-    else
-    {
-        second_argument = displayable_value;
-        calculate();
-        operation = operation_id;
-        first_argument = displayable_value;
-    }
-
-    if(first_argument != "NULL")
-    {
-        displayable_value = "0.0";
-        p_screen->setText(displayable_value);
-    }
+    printDebugInfo();
 }
 
 void MainWindow::dotButtonPressed()
 {
+    if(displayable_value == "Overflow" || displayable_value == "Error")
+        return;
+
     if(!displayable_value.contains("."))
         displayable_value.append(".");
     p_screen->setText(displayable_value);
+
+    printDebugInfo();
 }
 
 void MainWindow::lcdError()
 {
-    p_screen->setText("Error");
+    displayable_value = "Error";
+    p_screen->setText(displayable_value);
+    qDebug() << "error generated";
 }
 
 void MainWindow::calculate()
 {
-    static double local_first_argument = 0.0;
-    static double local_second_argument = 0.0;
-
-    if(operation == none)
+    if(first_argument == "NULL")
         return;
 
-    local_first_argument = first_argument.toDouble();
-
-    if(second_argument == "NULL")
-    {
-        local_second_argument = displayable_value.toDouble();
-        second_argument = displayable_value;
-    }
+    double x = first_argument.toDouble();
+    double y = second_argument.toDouble();
+    double result;
 
     switch(operation)
     {
-    case plus : local_first_argument += local_second_argument; break;
-    case minus : local_first_argument -= local_second_argument; break;
-    case division : local_first_argument /= local_second_argument; break;
-    case multiplication : local_first_argument *= local_second_argument; break;
+    case plus: result = x + y; break;
+    case minus: result = x - y; break;
+    case multiplication: result = x * y; break;
+    case division:
+        if(y == 0.0)
+        { lcdError(); return; }
+        result = x / y; break;
     }
 
-    first_argument = QString::number(local_first_argument);
-    second_argument = QString::number(local_second_argument);
+    first_argument = QString::number(result);
+
+    if(first_argument == "inf")
+    {
+        displayable_value = "Overflow";
+        p_screen->setText(displayable_value);
+        return;
+    }
 
     displayable_value = first_argument;
     p_screen->setText(displayable_value);
+
+    printDebugInfo();
 }
 
 void MainWindow::createDesign()
@@ -216,4 +228,19 @@ void MainWindow::createConnections()
     operation_buttons_mapper->setMapping(p_button_division, operations::division);
 
     connect(operation_buttons_mapper, SIGNAL(mapped(int)), this, SLOT(operationButtonPressed(int)), Qt::UniqueConnection);
+}
+
+void MainWindow::printDebugInfo()
+{
+    QString local_operation =   (operation == plus) ? "+" :
+                                (operation == minus) ? "-" :
+                                (operation == multiplication) ? "*" :
+                                (operation == division) ? "/" : "none";
+
+    qDebug() << "=========================================";
+    qDebug() << "screen          : " << displayable_value;
+    qDebug() << "first argument  : " << first_argument;
+    qDebug() << "second argument : " << second_argument;
+    qDebug() << "operation       : " << local_operation;
+    qDebug() << "flag            : " << flag;
 }

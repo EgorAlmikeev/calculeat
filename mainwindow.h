@@ -39,13 +39,15 @@ public:
     QSignalMapper *operation_buttons_mapper;
 
     QString displayable_value = "NULL";
-    QString first_argument = "NULL";
-    QString second_argument = "NULL";
+    QString first_argument = "0.0";
+    QString second_argument = "0.0";
     int operation = none;
+    bool flag;
 
     void createElements();
     void createDesign();
     void createConnections();
+    void printDebugInfo();
 
 private slots:
 
