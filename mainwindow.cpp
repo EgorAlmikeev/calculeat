@@ -99,7 +99,7 @@ void MainWindow::calculate()
 
     first_argument = QString::number(result);
 
-    if(first_argument == "inf")
+    if(first_argument == "inf" || first_argument == "-inf")
     {
         displayable_value = "Overflow";
         p_screen->setText(displayable_value);
