@@ -25,6 +25,8 @@ public:
 
     QPushButton *digits_buttons [10];
 
+    QPushButton *p_button_percent;
+    QPushButton *p_button_plus_minus;
     QPushButton *p_button_plus;
     QPushButton *p_button_minus;
     QPushButton *p_button_multiplication;
@@ -55,6 +57,8 @@ private slots:
     void digitButtonPressed(QString digit);
     void operationButtonPressed(int operation_id);
     void dotButtonPressed();
+    void percentButtonPressed();
+    void plusMinusButtonPressed();
     void lcdError();
     void calculate();
 };
