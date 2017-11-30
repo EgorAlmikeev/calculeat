@@ -146,6 +146,8 @@ void MainWindow::createDesign()
     p_button_equalse->setFont(buttons_font);
     p_button_clear->setFont(buttons_font);
     p_button_dot->setFont(buttons_font);
+    p_button_percent->setFont(buttons_font);
+    p_button_plus_minus->setFont(buttons_font);
 
     p_central_layout->addWidget(p_screen, 0, 0, 1, 4);
     p_central_layout->addWidget(p_button_clear, 1, 0, 1, 1);
@@ -173,7 +175,7 @@ void MainWindow::createDesign()
     p_central_layout->addWidget(p_button_equalse, 5, 3, 1, 1);
     p_central_layout->addWidget(p_button_dot, 5, 2, 1, 1);
 
-    p_central_layout->setRowStretch(0, 2);
+    p_central_layout->setRowStretch(0, 1);
     p_central_layout->setRowStretch(1, 1);
     p_central_layout->setRowStretch(2, 1);
     p_central_layout->setRowStretch(3, 1);
