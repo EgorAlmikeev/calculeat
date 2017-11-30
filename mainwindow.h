@@ -44,7 +44,8 @@ public:
     QString first_argument = "0.0";
     QString second_argument = "0.0";
     int operation = none;
-    bool flag;
+    bool operation_just_selected;
+    bool equals_just_pressed;
 
     void createElements();
     void createDesign();

@@ -20,7 +20,8 @@ void MainWindow::clearButtonPressed()
     first_argument = "NULL";
     second_argument = "NULL";
     operation = none;
-    flag = false;
+    operation_just_selected = false;
+    equals_just_pressed = false;
     p_screen->setText(displayable_value);
 
     printDebugInfo();
@@ -31,9 +32,9 @@ void MainWindow::digitButtonPressed(QString digit)
     if(displayable_value == "Overflow" || displayable_value == "Error")
         return;
 
-    if(flag)
+    if(operation_just_selected)
     {
-        flag = false;
+        operation_just_selected = false;
         displayable_value = digit;
         second_argument = displayable_value;
     }
@@ -51,10 +52,11 @@ void MainWindow::digitButtonPressed(QString digit)
 
 void MainWindow::operationButtonPressed(int operation_id)
 {
-//    if(operation_id != operation)
-//        calculate();
+    if(!equals_just_pressed)
+        calculate();
 
-    flag = true;
+    equals_just_pressed = false;
+    operation_just_selected = true;
     first_argument = displayable_value;
     operation = operation_id;
 
@@ -82,6 +84,8 @@ void MainWindow::lcdError()
 
 void MainWindow::calculate()
 {
+    equals_just_pressed = true;
+
     if(first_argument == "NULL")
         return;
 
@@ -263,5 +267,5 @@ void MainWindow::printDebugInfo()
     qDebug() << "first argument  : " << first_argument;
     qDebug() << "second argument : " << second_argument;
     qDebug() << "operation       : " << local_operation;
-    qDebug() << "flag            : " << flag;
+    qDebug() << "flag            : " << operation_just_selected;
 }
